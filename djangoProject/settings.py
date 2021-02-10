@@ -30,7 +30,8 @@ ALLOWED_HOSTS = ['mysql://root:root@localhost:3306/users', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
-    'users.apps.UserConfig',
+    'product.app.ProductAppConfig',
+    'user.apps.UserConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
