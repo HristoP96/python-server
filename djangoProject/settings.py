@@ -25,13 +25,13 @@ SECRET_KEY = '^)%1$ot))#vp_y&ne(f^6stulg*rcl-d#q*bs((lk@31hxt02p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['mysql://root:root@localhost:3306/users', '127.0.0.1']
+ALLOWED_HOSTS = ['mysql://root:root@localhost:3306/web_shop', '127.0.0.1']
 
 # Application definition
 
 INSTALLED_APPS = [
     'product.app.ProductAppConfig',
-    'user.apps.UserConfig',
+    'customer.apps.CustomerConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
