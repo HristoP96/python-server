@@ -1,16 +1,27 @@
 from django.http import JsonResponse, HttpResponse
-from .models import Customer
+from common.models import Customer
 from . import Session, Base, db_engine
 from django.views.decorators.csrf import csrf_exempt
-from interfaces import CrudAPI
+from common import CrudAPI
+
 Base.metadata.create_all(db_engine)
 session = Session()
 
 
 class CustomersCrudAPI(CrudAPI):
+    cache = []
+
     def index(self, request):
+        if len(self.cache) != 0:
+            return JsonResponse(self.cache, safe=False)
+
         users = session.query(Customer).all()
-        return HttpResponse(str(users))
+        res = []
+        for user in users:
+            obj = user.toJSON()
+            res.append(obj)
+        cache = res
+        return JsonResponse(res, safe=False)
 
     @csrf_exempt
     def add(self, request):

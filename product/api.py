@@ -1,35 +1,41 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
-from .models import Product
+from common.models import Brands
 from . import Session, Base, db_engine
 from django.views.decorators.csrf import csrf_exempt
-from interfaces import CrudAPI
+from common import CrudAPI
 
 Base.metadata.create_all(db_engine)
 session = Session()
 
 
-class ProductsCrudAPI(CrudAPI):
+class BrandsCrudAPI(CrudAPI):
+
     def index(self, request):
-        return JsonResponse(session.query(Product).all(), safe=False)
+        brands = session.query(Brands).all()
+        res = []
+        for brand in brands:
+            obj = brand.toJSON()
+            res.append(obj)
+        return JsonResponse(res, safe=False)
 
     @csrf_exempt
     def add(self, request):
         name = request.POST['name']
-        if session.query(Product).get(name) is not None:
+        if session.query(Brands).get(name) is not None:
             return HttpResponseBadRequest(f'Product {name} has already been added')
-        p = Product(name=name)
+        p = Brands(name=name)
         session.add(p)
         session.commit()
         return HttpResponse(f'Product {name} is added')
 
     @csrf_exempt
     def delete(self, request, record_id):
-        p = session.query(Product).get(record_id)
+        p = session.query(Brands).get(record_id)
         session.delete(p)
         session.commit()
-        return HttpResponse(f'Product {p.name} User delete')
+        return HttpResponse(f'Product {p.name} Brand delete')
 
     @csrf_exempt
     def get(self, request, record_id):
-        p = session.query(Product).get(record_id)
+        p = session.query(Brands).get(record_id)
         return JsonResponse(p, safe=False)

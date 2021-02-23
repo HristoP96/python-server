@@ -25,11 +25,20 @@ SECRET_KEY = '^)%1$ot))#vp_y&ne(f^6stulg*rcl-d#q*bs((lk@31hxt02p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['mysql://root:root@localhost:3306/web_shop', '127.0.0.1']
-
+ALLOWED_HOSTS = ["*"]
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'accept',
+'Access-Control-Allow-Origin'
+]
+CORS_ORIGIN_ALLOW_ALL = DEBUG
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:4200',
+)
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'product.app.ProductAppConfig',
     'customer.apps.CustomerConfig',
     'django.contrib.admin',
@@ -43,6 +52,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

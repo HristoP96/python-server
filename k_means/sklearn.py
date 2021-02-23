@@ -4,69 +4,89 @@ import pandas as pd
 from datetime import datetime, timedelta
 import seaborn as sns
 from sklearn import preprocessing, cluster
+import json
+
 
 # Implementation of K-means clustering using RFM profile of a customer
-def RFM():
-    orders = pd.read_csv('./orders.csv')
-    customer_count = len(orders.groupby('customer.id'))
+def RFM(data :list, cache_data):
+    invoices = pd.DataFrame(data)
+    cache = pd.DataFrame(cache_data)
 
-    orders = orders.drop(columns='order.line', axis=0)
-
-    orders['order.date'] = orders['order.date'].apply(pd.to_datetime)
-    orders['order.date'] = orders['order.date'].dt.date
+    pd.set_option('display.expand_frame_repr', False)
+    # print(invoices)
+    # customer_count = len(orders.groupby('customer.id'))
     #
-    rec_end = max(orders['order.date']) + timedelta(days=1)
-    print(rec_end)
-    rfm_df = orders.groupby('customer.id').agg({
-        'order.date': lambda x: (rec_end - max(x)).days,
-        'quantity': 'sum',
-        'order.id': 'count'
+    # orders = orders.drop(columns='order.line', axis=0)
+    # print(orders)
+    invoices['date'] = invoices['date'].apply(pd.to_datetime)
+    invoices['date'] = invoices['date'].dt.date
+
+
+    rec_end = max(invoices['date']) + timedelta(days=1)
+    # print(rec_end)
+    rfm_df = invoices.groupby('customer_id').agg({
+        # Get the days between the last and forlast purchase
+        'date': lambda x: (rec_end - max(x)).days,
+        'id': 'count',
+        'value': 'sum',
     })
-
+    #
     rfm_df.columns = ['Recency', 'Frequency', 'Monetary']
-    print(rfm_df)
-    # fig, axes = plt.subplots(1, 3, figsize=(20, 5))
-    for i, feature in enumerate(list(rfm_df.columns)):
-        pass
-        # sns.distplot(rfm_df[feature], ax=axes[i])
-    # plt.show()
 
-    # print(rfm_df.describe())
+    # fig, axes = plt.subplots(1, 3, figsize=(20, 5))
+    # for i, feature in enumerate(list(rfm_df.columns)):
+    #     sns.histplot(rfm_df[feature], ax=axes[i])
+    # plt.show()
 
     scaler = preprocessing.MinMaxScaler()
     rfm_normalized = pd.DataFrame(scaler.fit_transform(rfm_df))
     rfm_normalized.columns = ['n_Recency', 'n_Frequency', 'n_Monetary']
-    print(rfm_normalized.describe())
-
-    # Identifying the optimal k values
 
     # Sum of squared distances between centroids and each member of cluster
-    SSE = []
-    for k in range(10):
-        kmeans = cluster.KMeans(n_clusters=k + 1, init='k-means++').fit(rfm_normalized)
-        # print(kmeans)
-        SSE.append(kmeans.inertia_)
-    sns.pointplot(x=list(range(1, 11)), y=SSE)
-
+    # SSE = []
+    # for k in range(10):
+    #     kmeans = cluster.KMeans(n_clusters=k + 1, init='k-means++').fit(rfm_normalized)
+    #     # print(kmeans)
+    #     SSE.append(kmeans.inertia_)
+    # sns.pointplot(x=list(range(1, 11)), y=SSE)
     # plt.show()
 
-    model = cluster.KMeans(n_clusters=5, init='k-means++').fit(rfm_normalized)
+    model = cluster.KMeans(n_clusters=4, init='k-means++').fit(rfm_normalized)
+
+    # ## 3D scatter plot
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # ax.scatter(rfm_normalized['n_Recency'], rfm_normalized['n_Frequency'], rfm_normalized['n_Monetary'], cmap="brg", c = model.predict(rfm_normalized))
+    # centers = model.cluster_centers_
+    # ax.scatter(centers[:, 0], centers[:, 1], marker="*", s=500, c='red')
+    # plt.show()
+
     rfm_ = pd.DataFrame(scaler.inverse_transform(rfm_normalized))
     rfm_.columns = rfm_df.columns
     rfm_['Customer ID'] = rfm_df.index
     rfm_['Cluster'] = model.labels_
+    # #
+    # rfm_.sort_values(by='Recency', inplace=True)
+    # rfm_.sort_values(by=['Frequency', 'Monetary'], inplace=True, ascending=False)
+    #
 
-    rfm_.sort_values(by='Recency', inplace=True)
-    rfm_.sort_values(by=['Frequency', 'Monetary'], inplace=True, ascending=False)
+    t_cache = pd.DataFrame()
+    t_cache['Customer ID'] = rfm_['Customer ID']
+    t_cache['Cluster ID'] = rfm_['Cluster']
 
-    print(rfm_)
     clusters = rfm_.groupby(['Cluster']).agg({
-        'Recency': ['mean', 'max', 'min'],
-        'Frequency': ['mean', 'max', 'min'],
-        'Monetary': ['mean', 'max', 'min', 'count']
+        'Recency': 'mean',
+        'Frequency': 'mean',
+        'Monetary': 'mean',
+        'Customer ID': 'count'
     })
 
-    print(clusters)
+    analyzed_data = {}
+
+    analyzed_data['cluster_data'] = clusters.rename(columns={"Customer ID": "Volume"}).T
+    analyzed_data['customer_data'] = t_cache
+    return analyzed_data
+
 
     # rfm = np.zeros((customer_count, 3))
     # customer_monitory = list(orders.groupby(['customer.id']).agg({
@@ -96,7 +116,8 @@ def RFM():
     #     rfm[k, 1] = customer_frequency[k]
     #     rfm[k, 2] = customer_monitory[k]
     # print(rfm[0])
-RFM()
+
+
 # Customer implementation of K-means clustering
 def plot_k_means(X, K, max_iter=20):
     N, D = X.shape
@@ -168,4 +189,3 @@ def main():
     plot_k_means(X, K, max_iter=30)
     K = 5
     plot_k_means(X, K, max_iter=30)
-

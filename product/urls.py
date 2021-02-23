@@ -1,3 +1,3 @@
-from .api import ProductsCrudAPI
+from .api import BrandsCrudAPI
 
-urlpatterns = ProductsCrudAPI('str').url_patterns
+urlpatterns = BrandsCrudAPI('int').url_patterns
