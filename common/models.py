@@ -33,7 +33,7 @@ class Customer(Base):
     first_name = Column(String(50))
     last_name = Column(String(50))
     email = Column(String(50))
-    gender = Column(Enum('M', 'F'))
+    gender = Column(Enum('M', 'F', name='gender'))
     location_id = Column(Integer, ForeignKey('locations.id'))
     location = relationship("Location", primaryjoin="and_(Customer.location_id==Location.id)")
 
@@ -59,10 +59,10 @@ b_schema = BrandsSchema()
 
 
 class Brands(Base):
-
     __tablename__ = "brands"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False, primary_key=True)
+
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    name = Column(String(50), nullable=False)
 
     def toJSON(self):
         brand = dict(id=self.id, name=self.name)
