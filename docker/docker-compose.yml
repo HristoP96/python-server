@@ -11,18 +11,19 @@ services:
       POSTGRES_DB: rfm_db
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+      - ../backup:/var/lib/postgresql/backup
     ports:
-      - "5431:5431"
+      - "5431:5432"
     expose:
       - 5431
   server:
     container_name: rfm_container
     build:
-      context: ./
+      context: ../
       dockerfile: Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/code
+      - ../:/code
     ports:
       - "8000:8000"
     depends_on:

@@ -1,11 +1,11 @@
 from django.db.models.expressions import Col
 from sqlalchemy import Column, Integer, String, Enum, ForeignKey, DECIMAL, Date
 from sqlalchemy.orm import relationship
-from json import JSONEncoder
-from customer import Base
+from . import Base, db_engine, Session
+from sqlalchemy import text
 from marshmallow import Schema, fields
-from datetime import datetime
 
+Base.metadata.drop_all(db_engine)
 
 class LocationSchema(Schema):
     country = fields.Str()
@@ -104,3 +104,18 @@ class Invoice(Base):
     def to_rfm_json(self):
         invoice = dict(id=self.id, product_id=self.product_id, customer_id=self.customer_id, date=self.date, value=self.value)
         return i_rfm_schema.dump(invoice)
+
+Base.metadata.create_all(db_engine)
+
+session = Session()
+session.execute(text("ALTER SEQUENCE locations_id_seq RESTART WITH 1"))
+session.execute(text("ALTER SEQUENCE brands_id_seq RESTART WITH 1"))
+session.execute(text("ALTER SEQUENCE customers_id_seq RESTART WITH 1"))
+session.execute(text("ALTER SEQUENCE invoices_id_seq RESTART WITH 1"))
+session.commit()
+session.execute(text("COPY locations (country,city,longitude,latitude) FROM '/var/lib/postgresql/backup/locations.csv' CSV HEADER;"))
+session.execute(text("COPY brands (name) FROM '/var/lib/postgresql/backup/brands.csv' CSV HEADER;"))
+session.execute(text("COPY customers (first_name,last_name,email,gender,location_id) FROM '/var/lib/postgresql/backup/customers.csv' CSV HEADER;"))
+session.execute(text("COPY invoices (product_id,customer_id,date,value) FROM '/var/lib/postgresql/backup/invoices.csv' CSV HEADER;"))
+session.commit()
+session.close()

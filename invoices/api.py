@@ -1,17 +1,16 @@
 from django.http import JsonResponse
 from common.models import Invoice
-from . import Session, Base, db_engine
+from common import Session
 from common import CrudAPI
 from django.views.decorators.csrf import csrf_exempt
 import datetime
 from k_means.sklearn import RFM
-from sqlalchemy import between
+from sqlalchemy import between, text
 import pandas as pd
 from common.models import Customer
 class Cache:
     data = []
 
-Base.metadata.create_all(db_engine)
 session = Session()
 
 customer_cache_data = Cache()

@@ -1,1 +1,0 @@
-SELECT * FROM web_shop.customers, locations where locations.id = customers.location;

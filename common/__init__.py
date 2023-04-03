@@ -1,6 +1,13 @@
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.urls import path
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+
+db_engine = create_engine('postgresql+psycopg2://root:root@pg_container_rfm:5432/rfm_db')
+Session = sessionmaker(bind=db_engine)
+Base = declarative_base()
 
 
 class CrudAPI:
