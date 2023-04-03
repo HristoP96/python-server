@@ -1,12 +1,10 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from common.models import Brands
-from . import Session, Base, db_engine
+from common import Session
 from django.views.decorators.csrf import csrf_exempt
 from common import CrudAPI
 
-Base.metadata.create_all(db_engine)
 session = Session()
-
 
 class BrandsCrudAPI(CrudAPI):
 

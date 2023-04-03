@@ -1,1 +1,0 @@
-Select date, value, first_name, last_name from web_shop.invoices as inv join web_shop.customers on web_shop.customers.id = inv.customer_id;
